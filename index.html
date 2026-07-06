@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CyberEarn Pro - Hopweb Edition</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@600;800&family=Orbitron:wght@700;900&family=Noto+Sans+Bengali:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans Bengali', 'Oxanium', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* মোবাইলে ক্লিক করলে যেন নীল দাগ না পড়ে */
+        }
+
+        :root {
+            --bg-dark: #050212;
+            --panel-bg: rgba(19, 11, 46, 0.8);
+            --electric-cyan: #00f0ff;
+            --neon-pink: #ff0055;
+            --neon-green: #00ffaa;
+            --gold: #ffd700;
+            --text-main: #ffffff;
+            --text-sub: #9f99bd;
+            --input-bg: rgba(29, 17, 66, 0.85);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* প্রিমিয়াম ব্যাকগ্রাউন্ড গ্লো ইফেক্ট */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(120px);
+            opacity: 0.25;
+            pointer-events: none;
+        }
+        body::before { background: var(--neon-pink); top: -40px; left: -40px; }
+        body::after { background: var(--electric-cyan); bottom: 80px; right: -40px; }
+
+        /* মোবাইল স্ক্রিন ও ভিউপোর্ট ম্যানেজমেন্ট */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding-bottom: 80px; /* নিচের নেভিগেশন বারের জন্য জায়গা */
+        }
+
+        /* ওপরে ফিক্সড অ্যাপ বার */
+        .top-bar {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-section h1 {
+            font-family: 'Oxanium', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, var(--electric-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .balance-badge {
+            background: rgba(0, 255, 170, 0.1);
+            border: 1px solid var(--neon-green);
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 12px rgba(0, 255, 170, 0.2);
+        }
+
+        .balance-badge span {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--neon-green);
+        }
+
+        /* স্ক্রিন ট্যাব কন্ট্রোল */
+        .screen {
+            display: none;
+            padding: 20px;
+            animation: appFadeIn 0.35s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes appFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* প্রিমিয়াম সাইরেন কার্ড */
+        .premium-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 22px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- ড্যাশবোর্ড সেকশন --- */
+        .welcome-box h3 { font-size: 16px; color: var(--text-sub); }
+        .welcome-box h2 { font-size: 24px; font-weight: 800; margin-top: 4px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 18px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-box p { font-size: 13px; color: var(--text-sub); }
+        .stat-box h4 { font-family: 'Orbitron', sans-serif; font-size: 20px; margin-top: 6px; color: var(--electric-cyan); }
+
+        .daily-claim-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, var(--neon-pink), #ff5500);
+            border: none;
+            border-radius: 16px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255, 0, 85, 0.3);
+        }
+        .daily-claim-btn:active { transform: scale(0.98); }
+
+        .notice-board {
+            border-left: 4px solid var(--gold);
+            background: rgba(255, 215, 0, 0.04);
+        }
+        .notice-board h4 { color: var(--gold); margin-bottom: 5px; }
+        .notice-board p { font-size: 13.5px; color: var(--text-sub); line-height: 1.5; }
+
+        /* --- অ্যাড জোন সেকশন --- */
+        .ad-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ad-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .ad-info h4 { font-size: 15px; }
+        .ad-info p { font-size: 12px; color: var(--neon-green); font-family: 'Orbitron', sans-serif; margin-top: 3px; }
+
+        .watch-btn {
+            background: linear-gradient(135deg, var(--electric-cyan), #0072ff);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        /* অ্যাড পপআপ টাইমার মডাল */
+        .video-player-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 1, 9, 0.96);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .video-player-modal.active { opacity: 1; pointer-events: auto; }
+
+        .video-box {
+            width: 100%;
+            max-width: 380px;
+            height: 200px;
+            background: #000;
+            border: 2px solid var(--electric-cyan);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+        }
+
+        .timer-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--neon-pink);
+        }
+
+        /* --- লিডারবোর্ড সেকশন --- */
+        .rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rank-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+        }
+
+        .rank-user { display: flex; align-items: center; gap: 10px; }
+        .rank-number { font-family: 'Orbitron', sans-serif; font-weight: 900; width: 20px; color: var(--text-sub); }
+        .rank-item:nth-child(1) .rank-number { color: var(--gold); font-size: 18px; }
+        .rank-name { font-size: 14.5px; }
+        .rank-points { font-family: 'Orbitron', sans-serif; color: var(--neon-green); font-weight: 700; font-size: 14px; }
+
+        /* --- প্রোফাইল ও উইথড্র সেকশন --- */
+        .profile-header { text-align: center; }
+        .avatar-placeholder {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--neon-pink), var(--electric-cyan));
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 14.5px;
+        }
+        .info-row:last-child { border: none; }
+        .info-label { color: var(--text-sub); }
+
+        /* উইথড্র ইনপুট ফিল্ড */
+        .withdraw-box h4 { margin-bottom: 10px; color: var(--electric-cyan); }
+        .withdraw-input {
+            width: 100%;
+            padding: 14px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 12px;
+        }
+        .withdraw-input:focus { border-color: var(--electric-cyan); }
+
+        .withdraw-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--neon-green), #00b386);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        /* বটম ট্যাব বার (সবার নিচে ফিক্সড থাকবে) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: rgba(11, 6, 28, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 10px 0;
+            z-index: 500;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--electric-cyan);
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+        }
+
+        .nav-icon { font-size: 18px; }
+        .nav-text { font-size: 11px; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="top-bar">
+            <div class="logo-section">
+                <h1>CYBEREARN</h1>
+            </div>
+            <div class="balance-badge">
+                🪙 <span id="user-balance">1200</span>
+            </div>
+        </div>
+
+        <div id="screen-dashboard" class="screen active">
+            <div class="premium-card welcome-box">
+                <h3>স্বাগতম,</h3>
+                <h2>Cyber Hunter</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <p>আজকের ইনকাম</p>
+                    <h4 id="today-earned">১২০</h4>
+                </div>
+                <div class="stat-box">
+                    <p>মোট টাস্ক কমপ্লিট</p>
+                    <h4 id="total-tasks">১৫</h4>
+                </div>
+            </div>
+
+            <div class="premium-card">
+                <h4 style="margin-bottom: 6px;">ডেইলি রেওয়ার্ড</h4>
+                <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 12px;">প্রতিদিন একবার বোনাস কয়েন ফ্রিতে ক্লেইম করুন।</p>
+                <button class="daily-claim-btn" id="claim-btn" onclick="claimDailyReward()">🎁 ক্লেইম বোনাস (+১০০)</button>
+            </div>
+
+            <div class="premium-card notice-board">
+                <h4>⚠️ নোটিশ বোর্ড</h4>
+                <p>সবাই নিয়ম মেনে অ্যাড দেখুন। ১টি অ্যাড কমপ্লিট করলে ২০ কয়েন যোগ হবে। ভুলেও কোনো অ্যাডে ভুল ক্লিক (Invalid Click) করবেন না। পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪ ঘণ্টার মধ্যে বিকাশ বা নগদে টাকা পেয়ে যাবেন।</p>
+            </div>
+        </div>
+
+        <div id="screen-ads" class="screen">
+            <div class="premium-card">
+                <h3 style="color: var(--electric-cyan); margin-bottom: 4px;">ভিডিও টাস্ক জোন</h3>
+                <p style="font-size: 13px; color: var(--text-sub);">নিচের টাস্কগুলো সম্পূর্ণ করে কয়েন সংগ্রহ করুন।</p>
+            </div>
+
+            <div class="ad-grid">
+                <div class="ad-card">
+                    <div class="ad-info">
+                        <h4>প্লাটিনাম ভিডিও টাস্ক ১</h4>
+                        <p>🪙 +২০ কয়েন</p>
+                    </div>
+                    <button class="watch-btn" onclick="startAdTimer(15)">প্লে করুন ⚡</button>
+                </div>
+                <div class="ad-card">
+                    <div class="ad-info">
+                        <h4>গোল্ডেন ভিডিও টাস্ক ২</h4>
+                        <p>🪙 +২০ কয়েন</p>
+                    </div>
+                    <button class="watch-btn" onclick="startAdTimer(15)">প্লে করুন ⚡</button>
+                </div>
+                <div class="ad-card">
+                    <div class="ad-info">
+                        <h4>সিলভার ভিডিও টাস্ক ৩</h4>
+                        <p>🪙 +২০ কয়েন</p>
+                    </div>
+                    <button class="watch-btn" onclick="startAdTimer(15)">প্লে করুন ⚡</button>
+                </div>
+                <div class="ad-card">
+                    <div class="ad-info">
+                        <h4>মেগা মেম্বারশিপ টাস্ক ৪</h4>
+                        <p>🪙 +২০ কয়েন</p>
+                    </div>
+                    <button class="watch-btn" onclick="startAdTimer(15)">প্লে করুন ⚡</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-leaderboard" class="screen">
+            <div class="premium-card">
+                <h3 style="color: var(--gold); margin-bottom: 4px;">শীর্ষ উপার্জনকারী</h3>
+                <p style="font-size: 13px; color: var(--text-sub);">আমাদের অ্যাপের সেরা ৫ জন ইউজারের তালিকা।</p>
+            </div>
+
+            <div class="premium-card rank-list">
+                <div class="rank-item">
+                    <div class="rank-user"><span class="rank-number">🥇</span><span class="rank-name">সাকিব আহমেদ</span></div>
+                    <span class="rank-points">৪৫,২০০ 🪙</span>
+                </div>
+                <div class="rank-item">
+                    <div class="rank-user"><span class="rank-number">🥈</span><span class="rank-name">রকিবুল হাসান</span></div>
+                    <span class="rank-points">৩৮,১০০ 🪙</span>
+                </div>
+                <div class="rank-item">
+                    <div class="rank-user"><span class="rank-number">🥉</span><span class="rank-name">তানভীর ইসলাম</span></div>
+                    <span class="rank-points">৩২,৪৫০ 🪙</span>
+                </div>
+                <div class="rank-item">
+                    <div class="rank-user"><span class="rank-number">৪</span><span class="rank-name">ইমরান খান</span></div>
+                    <span class="rank-points">২৮,০০০ 🪙</span>
+                </div>
+                <div class="rank-item">
+                    <div class="rank-user"><span class="rank-number">৫</span><span class="rank-name">মেহেদী হাসান</span></div>
+                    <span class="rank-points">২৪,১৫০ 🪙</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-profile" class="screen">
+            <div class="premium-card profile-header">
+                <div class="avatar-placeholder">🥷</div>
+                <h3>Cyber Hunter</h3>
+                <p style="color: var(--text-sub); font-size: 13px; margin-top: 2px;">User ID: #998124</p>
+            </div>
+
+            <div class="premium-card">
+                <div class="info-row"><span class="info-label">মোবাইল নম্বর</span><span class="info-value">017XXXXXXXX</span></div>
+                <div class="info-row"><span class="info-label">অ্যাকাউন্ট স্ট্যাটাস</span><span style="color: var(--neon-green);">Active ✅</span></div>
+                <div class="info-row"><span class="info-label">টোটাল উইথড্র</span><span>🪙 ৫,০০০ কয়েন</span></div>
+            </div>
+
+            <div class="premium-card withdraw-box">
+                <h4>💵 উইথড্র বা পেমেন্ট মেথড</h4>
+                <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 12px;">মিনিমাম ৫০০০ কয়েন হলে বিকাশ বা নগদে টাকা তুলতে পারবেন।</p>
+                
+                <input type="number" class="withdraw-input" id="withdraw-amount" placeholder="কয়েনের পরিমাণ লিখুন (উদা: ৫০০০)">
+                <input type="text" class="withdraw-input" id="withdraw-number" placeholder="বিকাশ / নগদ নম্বর দিন">
+                
+                <button class="withdraw-btn" onclick="processWithdraw()">পেমেন্ট রিকোয়েস্ট পাঠান</button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="switchTab('dashboard', this)">
+                <span class="nav-icon">📊</span><span class="nav-text">ড্যাশবোর্ড</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('ads', this)">
+                <span class="nav-icon">📺</span><span class="nav-text">অ্যাড জোন</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('leaderboard', this)">
+                <span class="nav-icon">🏆</span><span class="nav-text">সেরা তালিকা</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('profile', this)">
+                <span class="nav-icon">👤</span><span class="nav-text">প্রোফাইল</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="video-player-modal" id="videoModal">
+        <div style="color: #fff; margin-bottom: 15px; font-size: 16px; font-weight: bold;">অ্যাড লোড হচ্ছে, সম্পূর্ণ দেখুন...</div>
+        <div class="video-box">
+            <div class="timer-display" id="adTimer">15s</div>
+        </div>
+        <p style="color: var(--text-sub); font-size: 13px; margin-top: 15px;">অ্যাড চলাকালীন ব্যাক বাটন প্রেস করবেন না।</p>
+    </div>
+
+    <script>
+        // লোকাল স্টোরেজ থেকে ডেটা রিড করা (যাতে অ্যাপ কেটে দিলেও কয়েন হারিয়ে না যায়)
+        let balance = parseInt(localStorage.getItem('hop_balance')) || 1200;
+        let todayEarned = parseInt(localStorage.getItem('hop_today')) || 120;
+        let totalTasks = parseInt(localStorage.getItem('hop_tasks')) || 15;
+        let dailyClaimedDate = localStorage.getItem('hop_daily_date') || "";
+
+        // UI আপডেট ফাংশন
+        function updateUI() {
+            document.getElementById('user-balance').innerText = balance;
+            document.getElementById('today-earned').innerText = todayEarned;
+            document.getElementById('total-tasks').innerText = totalTasks;
+            
+            // ডেইলি ক্লেইম বাটনের স্ট্যাটাস চেক
+            const todayStr = new Date().toDateString();
+            if(dailyClaimedDate === todayStr) {
+                const claimBtn = document.getElementById('claim-btn');
+                claimBtn.innerText = "❌ আজকের বোনাস ক্লেইমড";
+                claimBtn.style.background = "#252136";
+                claimBtn.style.color = "var(--text-sub)";
+                claimBtn.style.boxShadow = "none";
+                claimBtn.disabled = true;
+            }
+        }
+
+        // ট্যাব পরিবর্তনের লজিক
+        function switchTab(screenId, element) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+
+            document.getElementById('screen-' + screenId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // ডেইলি বোনাস ক্লেইম লজিক
+        function claimDailyReward() {
+            const todayStr = new Date().toDateString();
+            if(dailyClaimedDate === todayStr) return;
+
+            balance += 100;
+            todayEarned += 100;
+            dailyClaimedDate = todayStr;
+
+            localStorage.setItem('hop_balance', balance);
+            localStorage.setItem('hop_today', todayEarned);
+            localStorage.setItem('hop_daily_date', dailyClaimedDate);
+
+            alert("🎉 অভিনন্দন! আপনি ১০০ কয়েন ফ্রি বোনাস পেয়েছেন।");
+            updateUI();
+        }
+
+        // অ্যাড কাউন্টডাউন টাইমার সিস্টেম (১৫ সেকেন্ড রান হবে)
+        function startAdTimer(seconds) {
+            const modal = document.getElementById('videoModal');
+            const timerText = document.getElementById('adTimer');
+            modal.classList.add('active');
+
+            let timeLeft = seconds;
+            timerText.innerText = timeLeft + "s";
+
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = timeLeft + "s";
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    modal.classList.remove('active');
+                    
+                    // কয়েন ও টাস্ক রিওয়ার্ড অ্যাড করা
+                    balance += 20;
+                    todayEarned += 20;
+                    totalTasks += 1;
+
+                    localStorage.setItem('hop_balance', balance);
+                    localStorage.setItem('hop_today', todayEarned);
+                    localStorage.setItem('hop_tasks', totalTasks);
+
+                    alert("✅ টাস্ক সফল! আপনি ২০ কয়েন রিওয়ার্ড পেয়েছেন।");
+                    updateUI();
+                }
+            }, 1000);
+        }
+
+        // উইথড্র বা পেমেন্ট প্রসেসিং রিকোয়েস্ট ভ্যালিডেশন
+        function processWithdraw() {
+            const amtInput = document.getElementById('withdraw-amount').value;
+            const numInput = document.getElementById('withdraw-number').value.trim();
+
+            if (!amtInput || !numInput) {
+                alert("❌ দয়া করে পরিমাণ এবং মোবাইল নম্বর সঠিকভাবে পূরণ করুন।");
+                return;
+            }
+
+            const amount = parseInt(amtInput);
+            if (amount < 5000) {
+                alert("❌ মিনিমাম ৫,০০০ কয়েন উইথড্র করতে হবে।");
+                return;
+            }
+
+            if (amount > balance) {
+                alert("❌ আপনার অ্যাকাউন্টে পর্যাপ্ত কয়েন নেই।");
+                return;
+            }
+
+            // ব্যালেন্স মাইনাস করে সেভ করা
+            balance -= amount;
+            localStorage.setItem('hop_balance', balance);
+            updateUI();
+
+            alert("🚀 পেমেন্ট রিকোয়েস্ট সফল! অ্যাডমিন আপনার নম্বর (" + numInput + ") চেক করে ২৪ ঘণ্টার মধ্যে পেমেন্ট পাঠিয়ে দেবে।");
+            document.getElementById('withdraw-amount').value = "";
+            document.getElementById('withdraw-number').value = "";
+        }
+
+        // অ্যাপ লোড হওয়ার সাথে সাথে ডাটা চেক করা
+        window.onload = updateUI;
+    </script>
+</body>
+</html>
